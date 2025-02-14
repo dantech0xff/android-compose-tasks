@@ -19,10 +19,10 @@ import com.creative.androidtasks.database.entity.TaskEntity
 interface TaskDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTaskCollection(taskCollection: TaskCollection)
+    suspend fun insertTaskCollection(taskCollection: TaskCollection): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    suspend fun insertTask(task: TaskEntity): Long
 
     @Query("SELECT * FROM task_collection")
     suspend fun getTaskCollections(): List<TaskCollection>
@@ -31,23 +31,23 @@ interface TaskDAO {
     suspend fun getTasks(collectionId: Int): List<TaskEntity>
 
     @Query("UPDATE task SET is_favorite = :isFavorite WHERE id = :taskId")
-    suspend fun updateTaskFavorite(taskId: Int, isFavorite: Boolean)
+    suspend fun updateTaskFavorite(taskId: Int, isFavorite: Boolean): Int
 
     @Query("UPDATE task SET is_completed = :isCompleted WHERE id = :taskId")
-    suspend fun updateTaskCompleted(taskId: Int, isCompleted: Boolean)
+    suspend fun updateTaskCompleted(taskId: Int, isCompleted: Boolean): Int
 
     @Query("UPDATE task_collection SET title = :title WHERE id = :collectionId")
-    suspend fun updateTaskCollectionTitle(collectionId: Int, title: String)
+    suspend fun updateTaskCollectionTitle(collectionId: Int, title: String): Int
 
     @Update
-    suspend fun updateTaskCollection(taskCollection: TaskCollection)
+    suspend fun updateTaskCollection(taskCollection: TaskCollection): Int
 
     @Update
-    suspend fun updateTask(task: TaskEntity)
+    suspend fun updateTask(task: TaskEntity): Int
 
     @Delete
-    suspend fun deleteTaskCollection(taskCollection: TaskCollection)
+    suspend fun deleteTaskCollection(taskCollection: TaskCollection): Int
 
     @Delete
-    suspend fun deleteTask(task: TaskEntity)
+    suspend fun deleteTask(task: TaskEntity): Int
 }

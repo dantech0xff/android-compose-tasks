@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "task")
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int? = null,
+    val id: Long? = null,
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "is_favorite")
@@ -17,5 +17,7 @@ data class TaskEntity(
     @ColumnInfo(name = "collection_id")
     val collectionId: Int,
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long
+    val updatedAt: Long,
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long
 )
