@@ -1,6 +1,5 @@
 package com.creative.androidtasks.ui.floataction
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,15 +21,19 @@ import androidx.compose.ui.unit.dp
  */
  
 @Composable
-fun XFloatActionButton(modifier: Modifier, clickable: Boolean = true, onClick: () -> Unit = {}) {
+fun AppFloatActionButton(clickable: Boolean = true, onClick: () -> Unit = {}) {
     Box(
-        modifier = modifier
+        modifier = Modifier.background(
+            color = Color.Black.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(12.dp)
+        ).size(58.dp).clip(RoundedCornerShape(12.dp))
             .clickable(clickable) {
                 onClick.invoke()
             },
     ) {
         Text(
-            "+", style = MaterialTheme.typography.titleLarge, modifier = Modifier.align(Alignment.Center)
+            "+", style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }
