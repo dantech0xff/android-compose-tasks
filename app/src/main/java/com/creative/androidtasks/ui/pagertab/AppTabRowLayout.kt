@@ -7,6 +7,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import com.creative.androidtasks.ui.pagertab.state.TabUiState
 
 /**
  * Created by dan on 22/2/25
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.Dp
  */
  
 @Composable
-fun AppTabRowLayout(selectedTabIndex: Int, tabCount: Int, onTabSelected: (Int) -> Unit = {}) {
+fun AppTabRowLayout(selectedTabIndex: Int, listTabs: List<TabUiState>, onTabSelected: (Int) -> Unit = {}) {
     TabRow(selectedTabIndex,
         modifier = Modifier.fillMaxWidth(),
         indicator = { tabPositions ->
@@ -24,10 +25,10 @@ fun AppTabRowLayout(selectedTabIndex: Int, tabCount: Int, onTabSelected: (Int) -
                 width = Dp.Unspecified
             )
         }) {
-        repeat(tabCount) { tabIndex ->
+        repeat(listTabs.size) { tabIndex ->
             TabItemLayout(
-                state = tabIndex.toString(),
-                isSelected = (selectedTabIndex == tabIndex),
+                state = listTabs[tabIndex],
+                isSelected = selectedTabIndex == tabIndex,
                 onTabSelected = { onTabSelected(tabIndex) }
             )
         }

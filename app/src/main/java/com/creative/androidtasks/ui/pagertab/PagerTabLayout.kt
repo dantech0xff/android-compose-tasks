@@ -7,6 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.creative.androidtasks.ui.pagertab.state.TabUiState
+import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
 import kotlinx.coroutines.launch
 
 /**
@@ -17,12 +20,23 @@ import kotlinx.coroutines.launch
  
 @Composable
 fun PagerTabLayout() {
-    val pageCount by remember { mutableIntStateOf(2) }
+    var pageCount by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
+    val listTabs = listOf(
+        TabUiState(
+            id = 1,
+            title = "Tab 1"
+        ), TabUiState(
+            id = 2,
+            title = "Tab 2"
+        )
+    )
+    val listTaskPage = listOf(TaskPageUiState(listOf()), TaskPageUiState(listOf()))
+    pageCount = listTabs.size
     AppTabRowLayout(
         selectedTabIndex = pagerState.currentPage,
-        tabCount = pageCount,
+        listTabs = listTabs,
         onTabSelected = { index ->
             scope.launch {
                 pagerState.scrollToPage(index)
@@ -30,6 +44,6 @@ fun PagerTabLayout() {
         }
     )
     HorizontalPager(pagerState, key = { it }) { pageIndex ->
-        TaskListPage(state = pageIndex.toString())
+        TaskListPage(state = listTaskPage[pageIndex])
     }
 }
