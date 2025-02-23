@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.creative.androidtasks.TaskDelegate
 import com.creative.androidtasks.ui.pagertab.state.TaskUiState
 
 /**
@@ -25,7 +26,7 @@ import com.creative.androidtasks.ui.pagertab.state.TaskUiState
  */
  
 @Composable
-fun CompletedTaskListSection(completedTaskList: List<TaskUiState>) {
+fun CompletedTaskListSection(completedTaskList: List<TaskUiState>, taskDelegate: TaskDelegate) {
     AnimatedVisibility(completedTaskList.isNotEmpty()) {
         Column(
             modifier = Modifier
@@ -43,10 +44,12 @@ fun CompletedTaskListSection(completedTaskList: List<TaskUiState>) {
             completedTaskList.forEach {
                 TaskItemLayout(it, onCompleteTask = { taskState ->
                     Log.d("TaskItemLayout", "onCompleteTask: $taskState")
+                    taskDelegate.invertTaskCompleted(taskState)
                 }, onTaskClicked = { taskState ->
                     Log.d("TaskItemLayout", "onTaskClicked: $taskState")
                 }, onTaskFavorite = { taskState ->
                     Log.d("TaskItemLayout", "onTaskFavorite: $taskState")
+                    taskDelegate.invertTaskFavorite(taskState)
                 })
             }
         }

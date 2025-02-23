@@ -22,6 +22,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.creative.androidtasks.R
+import com.creative.androidtasks.TaskDelegate
 import com.creative.androidtasks.ui.pagertab.state.TaskUiState
 
 /**
@@ -31,7 +32,7 @@ import com.creative.androidtasks.ui.pagertab.state.TaskUiState
  */
  
 @Composable
-fun ActiveTaskListSection(activeTaskList: List<TaskUiState>) {
+fun ActiveTaskListSection(activeTaskList: List<TaskUiState>, taskDelegate: TaskDelegate) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,10 +65,12 @@ fun ActiveTaskListSection(activeTaskList: List<TaskUiState>) {
 
         activeTaskList.forEach {
             TaskItemLayout(it, onCompleteTask = { taskState ->
+                taskDelegate.invertTaskCompleted(taskState)
                 Log.d("TaskItemLayout", "onCompleteTask: $taskState")
             }, onTaskClicked = { taskState ->
                 Log.d("TaskItemLayout", "onTaskClicked: $taskState")
             }, onTaskFavorite = { taskState ->
+                taskDelegate.invertTaskFavorite(taskState)
                 Log.d("TaskItemLayout", "onTaskFavorite: $taskState")
             })
         }

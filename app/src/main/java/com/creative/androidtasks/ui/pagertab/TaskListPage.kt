@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.creative.androidtasks.TaskDelegate
 import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
 
 /**
@@ -24,7 +25,7 @@ import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
  */
  
 @Composable
-fun TaskListPage(state: TaskPageUiState) {
+fun TaskListPage(state: TaskPageUiState, taskDelegate: TaskDelegate) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .fillMaxHeight()
@@ -33,7 +34,7 @@ fun TaskListPage(state: TaskPageUiState) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ActiveTaskListSection(state.activeTaskList)
-        CompletedTaskListSection(state.completedTaskList)
+        ActiveTaskListSection(state.activeTaskList, taskDelegate)
+        CompletedTaskListSection(state.completedTaskList, taskDelegate)
     }
 }
