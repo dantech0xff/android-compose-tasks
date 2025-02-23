@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,17 +63,10 @@ fun ActiveTaskListSection(activeTaskList: List<TaskUiState>, taskDelegate: TaskD
                 Text("Nice work!", style = MaterialTheme.typography.bodyMedium)
             }
         }
-
         activeTaskList.forEach {
-            TaskItemLayout(it, onCompleteTask = { taskState ->
-                taskDelegate.invertTaskCompleted(taskState)
-                Log.d("TaskItemLayout", "onCompleteTask: $taskState")
-            }, onTaskClicked = { taskState ->
-                Log.d("TaskItemLayout", "onTaskClicked: $taskState")
-            }, onTaskFavorite = { taskState ->
-                taskDelegate.invertTaskFavorite(taskState)
-                Log.d("TaskItemLayout", "onTaskFavorite: $taskState")
-            })
+            key(it.id) {
+                TaskItemLayout(it, taskDelegate)
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.creative.androidtasks.ui.pagertab
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -10,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,16 +40,10 @@ fun CompletedTaskListSection(completedTaskList: List<TaskUiState>, taskDelegate:
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            completedTaskList.forEach {
-                TaskItemLayout(it, onCompleteTask = { taskState ->
-                    Log.d("TaskItemLayout", "onCompleteTask: $taskState")
-                    taskDelegate.invertTaskCompleted(taskState)
-                }, onTaskClicked = { taskState ->
-                    Log.d("TaskItemLayout", "onTaskClicked: $taskState")
-                }, onTaskFavorite = { taskState ->
-                    Log.d("TaskItemLayout", "onTaskFavorite: $taskState")
-                    taskDelegate.invertTaskFavorite(taskState)
-                })
+            completedTaskList.forEachIndexed { _, taskUiState ->
+                key(taskUiState.id) {
+                    TaskItemLayout(taskUiState, taskDelegate)
+                }
             }
         }
     }

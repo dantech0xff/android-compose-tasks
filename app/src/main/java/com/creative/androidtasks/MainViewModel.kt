@@ -1,6 +1,6 @@
 package com.creative.androidtasks
 
-import android.util.Log
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.creative.androidtasks.repository.TaskRepo
@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 /**
@@ -89,11 +90,11 @@ class MainViewModel @Inject constructor(
                 val newTabGroup = listTabGroup.map { tabGroup ->
                     val sumList = tabGroup.page.activeTaskList + tabGroup.page.completedTaskList
                     val updatedList = sumList.map { task ->
-                        if (task.id == newTaskUiState.id) newTaskUiState.copy() else task
+                        if (task.id == newTaskUiState.id) newTaskUiState.copy(updatedAt = Calendar.getInstance().timeInMillis) else task
                     }
                     val newPage = tabGroup.page.copy(
-                        activeTaskList = updatedList.filter { !it.isCompleted },
-                        completedTaskList = updatedList.filter { it.isCompleted }
+                        activeTaskList = updatedList.filter { !it.isCompleted }.sortedBy { it.updatedAt },
+                        completedTaskList = updatedList.filter { it.isCompleted }.sortedBy { it.updatedAt }
                     )
                     tabGroup.copy(page = newPage)
                 }
@@ -104,6 +105,6 @@ class MainViewModel @Inject constructor(
 }
 
 interface TaskDelegate {
-    fun invertTaskFavorite(taskUiState: TaskUiState): Unit
-    fun invertTaskCompleted(taskUiState: TaskUiState): Unit
+    fun invertTaskFavorite(taskUiState: TaskUiState) = Unit
+    fun invertTaskCompleted(taskUiState: TaskUiState) = Unit
 }
