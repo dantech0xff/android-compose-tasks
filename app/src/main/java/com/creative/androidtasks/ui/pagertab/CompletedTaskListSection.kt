@@ -1,5 +1,7 @@
 package com.creative.androidtasks.ui.pagertab
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.creative.androidtasks.ui.pagertab.state.TaskUiState
 
 /**
  * Created by dan on 22/2/25
@@ -22,20 +25,30 @@ import androidx.compose.ui.unit.dp
  */
  
 @Composable
-fun CompletedTaskListSection() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(
-                color = Color.Black.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(12.dp)
-            .animateContentSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Completed Task List")
+fun CompletedTaskListSection(completedTaskList: List<TaskUiState>) {
+    AnimatedVisibility(completedTaskList.isNotEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(
+                    color = Color.Black.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(12.dp)
+                .animateContentSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            completedTaskList.forEach {
+                TaskItemLayout(it, onCompleteTask = { taskState ->
+                    Log.d("TaskItemLayout", "onCompleteTask: $taskState")
+                }, onTaskClicked = { taskState ->
+                    Log.d("TaskItemLayout", "onTaskClicked: $taskState")
+                }, onTaskFavorite = { taskState ->
+                    Log.d("TaskItemLayout", "onTaskFavorite: $taskState")
+                })
+            }
+        }
     }
 }

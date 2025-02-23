@@ -10,7 +10,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.creative.androidtasks.ui.pagertab.state.TabUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
+import com.creative.androidtasks.ui.pagertab.state.TaskUiState
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 /**
  * Created by dan on 22/2/25
@@ -32,7 +34,25 @@ fun PagerTabLayout() {
             title = "Tab 2"
         )
     )
-    val listTaskPage = listOf(TaskPageUiState(listOf()), TaskPageUiState(listOf()))
+    val listTaskPage = listOf(TaskPageUiState(listOf(
+        TaskUiState(
+            content = "Task 1",
+            isCompleted = false,
+            isFavorite = true,
+            id = 1,
+            collectionId = 1,
+            updatedAt = Calendar.getInstance().timeInMillis
+        ),
+        TaskUiState(
+            content = "Task 2",
+            isCompleted = false,
+            isFavorite = true,
+            id = 2,
+            collectionId = 1,
+            updatedAt = Calendar.getInstance().timeInMillis
+        )
+    ), listOf()),
+        TaskPageUiState(listOf(), listOf()))
     pageCount = listTabs.size
     AppTabRowLayout(
         selectedTabIndex = pagerState.currentPage,
@@ -43,7 +63,7 @@ fun PagerTabLayout() {
             }
         }
     )
-    HorizontalPager(pagerState, key = { it }) { pageIndex ->
+    HorizontalPager(pagerState, key = { it }, beyondViewportPageCount = 2) { pageIndex ->
         TaskListPage(state = listTaskPage[pageIndex])
     }
 }
