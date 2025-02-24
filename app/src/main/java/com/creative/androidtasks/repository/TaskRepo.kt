@@ -11,9 +11,10 @@ import com.creative.androidtasks.database.entity.TaskEntity
 
 interface TaskRepo {
     suspend fun getTaskCollections(): List<TaskCollection>
-    suspend fun getTasksByCollectionId(collectionId: Int): List<TaskEntity>
+    suspend fun getTasksByCollectionId(collectionId: Long): List<TaskEntity>
     suspend fun addTaskCollection(title: String): TaskCollection?
-    suspend fun addTask(title: String, collectionId: Int): TaskEntity?
+    suspend fun addTask(getInstance: String, collectionId: Long): TaskEntity?
     suspend fun updateTask(task: TaskEntity): Boolean
+    suspend fun updateTaskCompleted(task: TaskEntity): Boolean
     suspend fun updateTaskCollection(taskCollection: TaskCollection): Boolean
 }

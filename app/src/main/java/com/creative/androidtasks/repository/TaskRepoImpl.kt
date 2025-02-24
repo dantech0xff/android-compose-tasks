@@ -20,7 +20,7 @@ class TaskRepoImpl(
         taskDAO.getTaskCollections()
     }
 
-    override suspend fun getTasksByCollectionId(collectionId: Int): List<TaskEntity> = withContext(Dispatchers.IO) {
+    override suspend fun getTasksByCollectionId(collectionId: Long): List<TaskEntity> = withContext(Dispatchers.IO) {
         taskDAO.getTasks(collectionId)
     }
 
@@ -35,10 +35,10 @@ class TaskRepoImpl(
         }
     }
 
-    override suspend fun addTask(title: String, collectionId: Int): TaskEntity? = withContext(Dispatchers.IO) {
+    override suspend fun addTask(content: String, collectionId: Long): TaskEntity? = withContext(Dispatchers.IO) {
         val now = Calendar.getInstance().timeInMillis
         val task = TaskEntity(
-            title = title,
+            content = content,
             isFavorite = false,
             isCompleted = false,
             collectionId = collectionId,
@@ -55,6 +55,10 @@ class TaskRepoImpl(
 
     override suspend fun updateTask(task: TaskEntity) = withContext(Dispatchers.IO) {
         taskDAO.updateTask(task) > 0
+    }
+
+    override suspend fun updateTaskCompleted(task: TaskEntity): Boolean = withContext(Dispatchers.IO) {
+        taskDAO.updateTaskCompleted(task.id, task.isCompleted) > 0
     }
 
     override suspend fun updateTaskCollection(taskCollection: TaskCollection) = withContext(Dispatchers.IO) {

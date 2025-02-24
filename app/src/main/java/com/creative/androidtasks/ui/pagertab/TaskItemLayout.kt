@@ -72,7 +72,7 @@ fun TaskItemLayoutPreview() {
             isFavorite = true,
             collectionId = 1,
             id = 1,
-            updatedAt = 1000
+            updatedAt = "2025-02-22"
         ),
         taskDelegate = object : TaskDelegate {}
     )
