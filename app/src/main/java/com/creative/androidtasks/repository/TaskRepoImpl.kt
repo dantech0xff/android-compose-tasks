@@ -61,6 +61,10 @@ class TaskRepoImpl(
         taskDAO.updateTaskCompleted(task.id, task.isCompleted) > 0
     }
 
+    override suspend fun updateTaskFavorite(task: TaskEntity): Boolean = withContext(Dispatchers.IO) {
+        taskDAO.updateTaskFavorite(task.id, task.isFavorite) > 0
+    }
+
     override suspend fun updateTaskCollection(taskCollection: TaskCollection) = withContext(Dispatchers.IO) {
         taskDAO.updateTaskCollection(taskCollection) > 0
     }

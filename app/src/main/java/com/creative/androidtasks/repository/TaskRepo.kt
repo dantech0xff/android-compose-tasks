@@ -16,5 +16,6 @@ interface TaskRepo {
     suspend fun addTask(getInstance: String, collectionId: Long): TaskEntity?
     suspend fun updateTask(task: TaskEntity): Boolean
     suspend fun updateTaskCompleted(task: TaskEntity): Boolean
+    suspend fun updateTaskFavorite(task: TaskEntity): Boolean
     suspend fun updateTaskCollection(taskCollection: TaskCollection): Boolean
 }

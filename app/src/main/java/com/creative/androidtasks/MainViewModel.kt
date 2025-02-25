@@ -60,8 +60,11 @@ class MainViewModel @Inject constructor(
     }
 
     override fun invertTaskFavorite(taskUiState: TaskUiState) {
-        /*viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             val newTaskUiState = taskUiState.copy(isFavorite = !taskUiState.isFavorite)
+            if (!taskRepo.updateTaskFavorite(newTaskUiState.toTaskEntity())) {
+                return@launch
+            }
             listTabGroup.value.let { listTabGroup ->
                 val newTabGroup = listTabGroup.map { tabGroup ->
                     val newPage = tabGroup.page.copy(
@@ -76,7 +79,7 @@ class MainViewModel @Inject constructor(
                 }
                 _listTabGroup.value = newTabGroup
             }
-        }*/
+        }
     }
 
     override fun invertTaskCompleted(taskUiState: TaskUiState) {
