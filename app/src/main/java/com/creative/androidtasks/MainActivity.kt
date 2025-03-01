@@ -18,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,20 @@ class MainActivity : ComponentActivity() {
                 val listTabGroup by mainViewModel.listTabGroup.collectAsStateWithLifecycle()
                 val taskDelegate = remember { mainViewModel }
                 var isShowAddNoteBottomSheet by remember { mutableStateOf(false) }
+                var isShowAddTaskCollectionBottomSheet by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    mainViewModel.eventFlow.collect {
+                        when (it) {
+                            MainEvent.RequestAddNewCollection -> {
+                                isShowAddTaskCollectionBottomSheet = true
+                            }
+
+                            else -> {}
+                        }
+                    }
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
                     AppFloatActionButton {
                         isShowAddNoteBottomSheet = true
@@ -55,7 +70,7 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        TopBar()
+                        TopBar(taskDelegate)
                         if (listTabGroup.isNotEmpty()) {
                             PagerTabLayout(listTabGroup, taskDelegate)
                         } else {
@@ -63,7 +78,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    if(isShowAddNoteBottomSheet) {
+                    if (isShowAddNoteBottomSheet) {
                         var inputTaskContent by remember { mutableStateOf("") }
                         ModalBottomSheet({
                             isShowAddNoteBottomSheet = false
@@ -82,6 +97,29 @@ class MainActivity : ComponentActivity() {
                                 isShowAddNoteBottomSheet = false
                             }, modifier = Modifier.fillMaxWidth()) {
                                 Text("Add Task")
+                            }
+                        }
+                    }
+
+                    if (isShowAddTaskCollectionBottomSheet) {
+                        var inputTaskCollection by remember { mutableStateOf("") }
+                        ModalBottomSheet({
+                            isShowAddTaskCollectionBottomSheet = false
+                        }) {
+                            Text("Input Task Collection", modifier = Modifier.fillMaxWidth())
+                            TextField(
+                                value = inputTaskCollection,
+                                onValueChange = { inputTaskCollection = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Button({
+                                if (inputTaskCollection.isNotEmpty()) {
+                                    taskDelegate.addNewCollection(inputTaskCollection)
+                                    inputTaskCollection = ""
+                                }
+                                isShowAddTaskCollectionBottomSheet = false
+                            }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Add Task Collection")
                             }
                         }
                     }

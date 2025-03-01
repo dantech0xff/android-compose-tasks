@@ -12,7 +12,9 @@ import com.creative.androidtasks.ui.pagertab.state.toTaskEntity
 import com.creative.androidtasks.ui.pagertab.state.toTaskUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -28,6 +30,10 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val taskRepo: TaskRepo,
 ) : ViewModel(), TaskDelegate {
+
+    private val _eventFlow: MutableSharedFlow<MainEvent> = MutableSharedFlow()
+    public val eventFlow = _eventFlow.asSharedFlow()
+
     private val _listTabGroup: MutableStateFlow<List<TaskGroupUiState>> = MutableStateFlow(emptyList())
     val listTabGroup = _listTabGroup.asStateFlow()
 
@@ -117,12 +123,16 @@ class MainViewModel @Inject constructor(
                 val newTaskUiState = taskEntity.toTaskUiState()
                 listTabGroup.value.let { listTabGroup ->
                     val newTabGroup = listTabGroup.map { tabGroup ->
-                        val newPage = tabGroup.page.copy(
-                            activeTaskList = (tabGroup.page.activeTaskList + newTaskUiState).sortedByDescending {
-                                it.updatedAt
-                            }
-                        )
-                        tabGroup.copy(page = newPage)
+                        if (tabGroup.tab.id == collectionId) {
+                            val newPage = tabGroup.page.copy(
+                                activeTaskList = (tabGroup.page.activeTaskList + newTaskUiState).sortedByDescending {
+                                    it.updatedAt
+                                }
+                            )
+                            tabGroup.copy(page = newPage)
+                        } else {
+                            tabGroup
+                        }
                     }
                     _listTabGroup.value = newTabGroup
                 }
@@ -143,6 +153,22 @@ class MainViewModel @Inject constructor(
         _currentSelectedCollectionIndex = index
         Log.d("MainViewModel", "Current selected collection index: $_currentSelectedCollectionIndex")
     }
+
+    override fun addNewCollection(title: String) {
+        viewModelScope.launch {
+            taskRepo.addTaskCollection(title)?.let { taskCollection ->
+                val tabUiState = taskCollection.toTabUiState()
+                val newTabGroup = TaskGroupUiState(tabUiState, TaskPageUiState(emptyList(), emptyList()))
+                _listTabGroup.value += newTabGroup
+            }
+        }
+    }
+
+    override fun requestAddNewCollection() {
+        viewModelScope.launch {
+            _eventFlow.emit(MainEvent.RequestAddNewCollection)
+        }
+    }
 }
 
 interface TaskDelegate {
@@ -151,4 +177,10 @@ interface TaskDelegate {
     fun addNewTask(collectionId: Long, content: String) = Unit
     fun addNewTaskToCurrentCollection(content: String) = Unit
     fun updateCurrentCollectionIndex(index: Int) = Unit
+    fun addNewCollection(title: String) = Unit
+    fun requestAddNewCollection(): Unit
+}
+
+sealed class MainEvent {
+    data object RequestAddNewCollection : MainEvent()
 }
