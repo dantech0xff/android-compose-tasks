@@ -31,6 +31,7 @@ class MainViewModel @Inject constructor(
     private val _listTabGroup: MutableStateFlow<List<TaskGroupUiState>> = MutableStateFlow(emptyList())
     val listTabGroup = _listTabGroup.asStateFlow()
 
+    private var _currentSelectedCollectionIndex: Int = 0
     init {
         viewModelScope.launch {
             val listTasksCollections = taskRepo.getTaskCollections()
@@ -51,8 +52,8 @@ class MainViewModel @Inject constructor(
                 }
                 val tabUiState = taskCollection.toTabUiState()
                 TaskGroupUiState(tabUiState, TaskPageUiState(
-                    activeTaskList = listTaskUiState.filter { !it.isCompleted },
-                    completedTaskList = listTaskUiState.filter { it.isCompleted }
+                    activeTaskList = listTaskUiState.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
+                    completedTaskList = listTaskUiState.filter { it.isCompleted }.sortedByDescending { it.updatedAt }
                 ))
             }
             _listTabGroup.value = listTabGroupUiState
@@ -93,11 +94,15 @@ class MainViewModel @Inject constructor(
                 val newTabGroup = listTabGroup.map { tabGroup ->
                     val sumList = tabGroup.page.activeTaskList + tabGroup.page.completedTaskList
                     val updatedList = sumList.map { task ->
-                        if (task.id == newTaskUiState.id) newTaskUiState.copy(updatedAt = Calendar.getInstance().time.toString()) else task
+                        if (task.id == newTaskUiState.id) {
+                            newTaskUiState.copy(updatedAt = Calendar.getInstance().time.toString())
+                        } else {
+                            task
+                        }
                     }
                     val newPage = tabGroup.page.copy(
-                        activeTaskList = updatedList.filter { !it.isCompleted }.sortedBy { it.updatedAt },
-                        completedTaskList = updatedList.filter { it.isCompleted }.sortedBy { it.updatedAt }
+                        activeTaskList = updatedList.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
+                        completedTaskList = updatedList.filter { it.isCompleted }.sortedByDescending { it.updatedAt }
                     )
                     tabGroup.copy(page = newPage)
                 }
@@ -105,9 +110,45 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    override fun addNewTask(collectionId: Long, content: String) {
+        viewModelScope.launch {
+            taskRepo.addTask(content, collectionId)?.let { taskEntity ->
+                val newTaskUiState = taskEntity.toTaskUiState()
+                listTabGroup.value.let { listTabGroup ->
+                    val newTabGroup = listTabGroup.map { tabGroup ->
+                        val newPage = tabGroup.page.copy(
+                            activeTaskList = (tabGroup.page.activeTaskList + newTaskUiState).sortedByDescending {
+                                it.updatedAt
+                            }
+                        )
+                        tabGroup.copy(page = newPage)
+                    }
+                    _listTabGroup.value = newTabGroup
+                }
+            }
+        }
+    }
+
+    override fun addNewTaskToCurrentCollection(content: String) {
+        viewModelScope.launch {
+            listTabGroup.value.getOrNull(_currentSelectedCollectionIndex)?.let { currentTab ->
+                val collectionId = currentTab.tab.id
+                addNewTask(collectionId, content)
+            }
+        }
+    }
+
+    override fun updateCurrentCollectionIndex(index: Int) {
+        _currentSelectedCollectionIndex = index
+        Log.d("MainViewModel", "Current selected collection index: $_currentSelectedCollectionIndex")
+    }
 }
 
 interface TaskDelegate {
     fun invertTaskFavorite(taskUiState: TaskUiState) = Unit
     fun invertTaskCompleted(taskUiState: TaskUiState) = Unit
+    fun addNewTask(collectionId: Long, content: String) = Unit
+    fun addNewTaskToCurrentCollection(content: String) = Unit
+    fun updateCurrentCollectionIndex(index: Int) = Unit
 }

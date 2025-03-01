@@ -3,11 +3,13 @@ package com.creative.androidtasks.ui.pagertab
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import com.creative.androidtasks.TaskDelegate
 import com.creative.androidtasks.ui.pagertab.state.TabUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskGroupUiState
@@ -28,6 +30,13 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
     val pagerState = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
     pageCount = state.size
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { pagerState.currentPage }.collect { index ->
+            taskDelegate.updateCurrentCollectionIndex(index)
+        }
+    }
+
     AppTabRowLayout(
         selectedTabIndex = pagerState.currentPage,
         listTabs = state.map { it.tab },

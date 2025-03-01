@@ -10,11 +10,18 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,6 +36,7 @@ class MainActivity : ComponentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,9 +44,10 @@ class MainActivity : ComponentActivity() {
             AndroidTasksTheme {
                 val listTabGroup by mainViewModel.listTabGroup.collectAsStateWithLifecycle()
                 val taskDelegate = remember { mainViewModel }
+                var isShowAddNoteBottomSheet by remember { mutableStateOf(false) }
                 Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
                     AppFloatActionButton {
-                        Log.d("MainActivity", "FloatingActionButton Clicked")
+                        isShowAddNoteBottomSheet = true
                     }
                 }) { innerPadding ->
                     Column(
@@ -51,6 +60,29 @@ class MainActivity : ComponentActivity() {
                             PagerTabLayout(listTabGroup, taskDelegate)
                         } else {
                             Text("NO TASKS AVAILABLE!!!")
+                        }
+                    }
+
+                    if(isShowAddNoteBottomSheet) {
+                        var inputTaskContent by remember { mutableStateOf("") }
+                        ModalBottomSheet({
+                            isShowAddNoteBottomSheet = false
+                        }) {
+                            Text("Input Task Content", modifier = Modifier.fillMaxWidth())
+                            TextField(
+                                value = inputTaskContent,
+                                onValueChange = { inputTaskContent = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Button({
+                                if (inputTaskContent.isNotEmpty()) {
+                                    taskDelegate.addNewTaskToCurrentCollection(inputTaskContent)
+                                    inputTaskContent = ""
+                                }
+                                isShowAddNoteBottomSheet = false
+                            }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Add Task")
+                            }
                         }
                     }
                 }

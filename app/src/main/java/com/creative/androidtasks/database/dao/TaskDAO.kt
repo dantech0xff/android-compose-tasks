@@ -33,8 +33,8 @@ interface TaskDAO {
     @Query("UPDATE task SET is_favorite = :isFavorite WHERE id = :taskId")
     suspend fun updateTaskFavorite(taskId: Long, isFavorite: Boolean): Int
 
-    @Query("UPDATE task SET is_completed = :isCompleted WHERE id = :taskId")
-    suspend fun updateTaskCompleted(taskId: Long, isCompleted: Boolean): Int
+    @Query("UPDATE task SET is_completed = :isCompleted, updated_at = :updatedAt WHERE id = :taskId")
+    suspend fun updateTaskCompleted(taskId: Long, isCompleted: Boolean, updatedAt: Long = System.currentTimeMillis()): Int
 
     @Query("UPDATE task_collection SET title = :title WHERE id = :collectionId")
     suspend fun updateTaskCollectionTitle(collectionId: Long, title: String): Int
