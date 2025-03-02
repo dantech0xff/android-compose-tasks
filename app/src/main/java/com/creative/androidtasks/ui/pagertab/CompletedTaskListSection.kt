@@ -35,7 +35,7 @@ fun CompletedTaskListSection(completedTaskList: List<TaskUiState>, taskDelegate:
                     color = Color.Black.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(12.dp)
                 )
-                .padding(12.dp)
+                .padding(vertical = 12.dp)
                 .animateContentSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally

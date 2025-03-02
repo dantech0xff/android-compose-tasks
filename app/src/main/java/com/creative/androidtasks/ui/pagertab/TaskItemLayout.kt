@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
@@ -51,7 +50,7 @@ fun TaskItemLayout(
                 textDecoration = TextDecoration.LineThrough.takeIf { state.isCompleted }
             )
             if (state.isCompleted) {
-                Text(text = "Completed: ${state.updatedAt}", modifier = Modifier.padding(horizontal = 4.dp),)
+                Text(text = "Completed: ${state.stringUpdatedAt}", modifier = Modifier.padding(horizontal = 4.dp),)
             }
         }
         if (!state.isCompleted) {
@@ -72,7 +71,8 @@ fun TaskItemLayoutPreview() {
             isFavorite = true,
             collectionId = 1,
             id = 1,
-            updatedAt = "2025-02-22"
+            updatedAt = 0L,
+            stringUpdatedAt = "2025-02-22"
         ),
         taskDelegate = object : TaskDelegate {}
     )
