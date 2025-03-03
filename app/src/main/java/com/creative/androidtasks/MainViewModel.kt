@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.creative.androidtasks.repository.TaskRepo
+import com.creative.androidtasks.ui.pagertab.state.TabUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskGroupUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskUiState
@@ -14,8 +15,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -26,6 +29,8 @@ import javax.inject.Inject
  * Copyright © 2025 1010 Creative. All rights reserved.
  */
 
+const val ID_ADD_NEW_LIST = -999L
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val taskRepo: TaskRepo,
@@ -35,7 +40,12 @@ class MainViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     private val _listTabGroup: MutableStateFlow<List<TaskGroupUiState>> = MutableStateFlow(emptyList())
-    val listTabGroup = _listTabGroup.asStateFlow()
+    val listTabGroup = _listTabGroup.map {
+        it + TaskGroupUiState(
+            tab = TabUiState(ID_ADD_NEW_LIST, "Add New List"),
+            page = TaskPageUiState(emptyList(), emptyList())
+        )
+    }
 
     private var _currentSelectedCollectionIndex: Int = 0
     init {
@@ -72,7 +82,7 @@ class MainViewModel @Inject constructor(
             if (!taskRepo.updateTaskFavorite(newTaskUiState.id, newTaskUiState.isFavorite)) {
                 return@launch
             }
-            listTabGroup.value.let { listTabGroup ->
+            _listTabGroup.value.let { listTabGroup ->
                 val newTabGroup = listTabGroup.map { tabGroup ->
                     val newPage = tabGroup.page.copy(
                         activeTaskList = tabGroup.page.activeTaskList.map { task ->
@@ -102,7 +112,7 @@ class MainViewModel @Inject constructor(
                 Log.e("MainViewModel", "Failed to update task completed")
                 return@launch
             }
-            listTabGroup.value.let { listTabGroup ->
+            _listTabGroup.value.let { listTabGroup ->
                 val newTabGroup = listTabGroup.map { tabGroup ->
                     val sumList = tabGroup.page.activeTaskList + tabGroup.page.completedTaskList
                     val updatedList = sumList.map { task ->
@@ -131,7 +141,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             taskRepo.addTask(content, collectionId)?.let { taskEntity ->
                 val newTaskUiState = taskEntity.toTaskUiState()
-                listTabGroup.value.let { listTabGroup ->
+                _listTabGroup.value.let { listTabGroup ->
                     val newTabGroup = listTabGroup.map { tabGroup ->
                         if (tabGroup.tab.id == collectionId) {
                             val newPage = tabGroup.page.copy(
@@ -152,7 +162,7 @@ class MainViewModel @Inject constructor(
 
     override fun addNewTaskToCurrentCollection(content: String) {
         viewModelScope.launch {
-            listTabGroup.value.getOrNull(_currentSelectedCollectionIndex)?.let { currentTab ->
+            _listTabGroup.value.getOrNull(_currentSelectedCollectionIndex)?.let { currentTab ->
                 val collectionId = currentTab.tab.id
                 addNewTask(collectionId, content)
             }

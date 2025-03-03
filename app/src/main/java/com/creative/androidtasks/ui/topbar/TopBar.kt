@@ -28,11 +28,11 @@ fun TopBar(taskDelegate: TaskDelegate) {
             "Tasks", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.align(Alignment.Center)
         )
-        Button(onClick = {
-            taskDelegate.requestAddNewCollection()
-        }) {
-            Text("+ New List")
-        }
+//        Button(onClick = {
+//            taskDelegate.requestAddNewCollection()
+//        }) {
+//            Text("+ New List")
+//        }
     }
 }
 

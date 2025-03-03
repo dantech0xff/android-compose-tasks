@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import com.creative.androidtasks.ID_ADD_NEW_LIST
 import com.creative.androidtasks.TaskDelegate
 import com.creative.androidtasks.ui.pagertab.state.TabUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskGroupUiState
@@ -29,7 +30,9 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
     var pageCount by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
-    pageCount = state.size
+    pageCount = state.count {
+        it.tab.id > 0
+    }
 
     LaunchedEffect(Unit) {
         snapshotFlow { pagerState.currentPage }.collect { index ->
@@ -41,8 +44,12 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
         selectedTabIndex = pagerState.currentPage,
         listTabs = state.map { it.tab },
         onTabSelected = { index ->
-            scope.launch {
-                pagerState.scrollToPage(index)
+            if ((state.getOrNull(index)?.tab?.id ?: 0) == ID_ADD_NEW_LIST) {
+                taskDelegate.requestAddNewCollection()
+            } else {
+                scope.launch {
+                    pagerState.scrollToPage(index)
+                }
             }
         }
     )

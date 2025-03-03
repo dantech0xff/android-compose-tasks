@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidTasksTheme {
-                val listTabGroup by mainViewModel.listTabGroup.collectAsStateWithLifecycle()
+                val listTabGroup by mainViewModel.listTabGroup.collectAsStateWithLifecycle(emptyList())
                 val taskDelegate = remember { mainViewModel }
                 var isShowAddNoteBottomSheet by remember { mutableStateOf(false) }
                 var isShowAddTaskCollectionBottomSheet by remember { mutableStateOf(false) }
