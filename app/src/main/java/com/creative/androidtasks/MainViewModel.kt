@@ -30,6 +30,7 @@ import javax.inject.Inject
  */
 
 const val ID_ADD_NEW_LIST = -999L
+const val ID_FAVORITE_LIST = -1000L
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -41,7 +42,19 @@ class MainViewModel @Inject constructor(
 
     private val _listTabGroup: MutableStateFlow<List<TaskGroupUiState>> = MutableStateFlow(emptyList())
     val listTabGroup = _listTabGroup.map {
-        it + TaskGroupUiState(
+        listOf(
+            TaskGroupUiState(
+                tab = TabUiState(ID_FAVORITE_LIST, "⭐"),
+                page = TaskPageUiState(
+                    mutableListOf<TaskUiState>().apply {
+                    it.forEach { tab ->
+                        addAll(tab.page.activeTaskList.filter { task -> task.isFavorite })
+                    }
+                }.sortedByDescending { task -> task.updatedAt },
+                    emptyList()
+                )
+            )
+        ) + it + TaskGroupUiState(
             tab = TabUiState(ID_ADD_NEW_LIST, "Add New List"),
             page = TaskPageUiState(emptyList(), emptyList())
         )
@@ -164,7 +177,9 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             _listTabGroup.value.getOrNull(_currentSelectedCollectionIndex)?.let { currentTab ->
                 val collectionId = currentTab.tab.id
-                addNewTask(collectionId, content)
+                if (collectionId > 0) {
+                    addNewTask(collectionId, content)
+                }
             }
         }
     }

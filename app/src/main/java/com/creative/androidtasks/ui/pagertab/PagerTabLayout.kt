@@ -31,7 +31,7 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
     val pagerState = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
     pageCount = state.count {
-        it.tab.id > 0
+        it.tab.id != ID_ADD_NEW_LIST
     }
 
     LaunchedEffect(Unit) {
