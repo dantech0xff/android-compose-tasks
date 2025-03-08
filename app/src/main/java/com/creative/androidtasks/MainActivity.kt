@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
                     AppFloatActionButton {
-                        isShowAddNoteBottomSheet = true
+                        isShowAddNoteBottomSheet = taskDelegate.currentCollectionId() > 0
                     }
                 }) { innerPadding ->
                     Column(

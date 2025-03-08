@@ -15,10 +15,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -60,7 +58,7 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    private var _currentSelectedCollectionIndex: Int = 0
+    private var _currentSelectedCollectionId: Long = -1L
     init {
         viewModelScope.launch {
             val listTasksCollections = taskRepo.getTaskCollections()
@@ -175,7 +173,7 @@ class MainViewModel @Inject constructor(
 
     override fun addNewTaskToCurrentCollection(content: String) {
         viewModelScope.launch {
-            _listTabGroup.value.getOrNull(_currentSelectedCollectionIndex)?.let { currentTab ->
+            _listTabGroup.value.firstOrNull { it.tab.id == _currentSelectedCollectionId }?.let { currentTab ->
                 val collectionId = currentTab.tab.id
                 if (collectionId > 0) {
                     addNewTask(collectionId, content)
@@ -184,9 +182,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    override fun updateCurrentCollectionIndex(index: Int) {
-        _currentSelectedCollectionIndex = index
-        Log.d("MainViewModel", "Current selected collection index: $_currentSelectedCollectionIndex")
+    override fun updateCurrentCollectionId(collectionId: Long) {
+        _currentSelectedCollectionId = collectionId
+    }
+
+    override fun currentCollectionId(): Long {
+        return _currentSelectedCollectionId
     }
 
     override fun addNewCollection(title: String) {
@@ -211,7 +212,8 @@ interface TaskDelegate {
     fun invertTaskCompleted(taskUiState: TaskUiState) = Unit
     fun addNewTask(collectionId: Long, content: String) = Unit
     fun addNewTaskToCurrentCollection(content: String) = Unit
-    fun updateCurrentCollectionIndex(index: Int) = Unit
+    fun updateCurrentCollectionId(collectionId: Long) = Unit
+    fun currentCollectionId(): Long = -1L
     fun addNewCollection(title: String) = Unit
     fun requestAddNewCollection(): Unit = Unit
 }

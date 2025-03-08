@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -28,6 +29,8 @@ import java.util.Calendar
 @Composable
 fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
     var pageCount by remember { mutableIntStateOf(0) }
+    var internalState by remember { mutableStateOf(state) }
+    internalState = state
     val pagerState = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
     pageCount = state.count {
@@ -36,7 +39,9 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
 
     LaunchedEffect(Unit) {
         snapshotFlow { pagerState.currentPage }.collect { index ->
-            taskDelegate.updateCurrentCollectionIndex(index)
+            internalState.getOrNull(index)?.tab?.id?.let { currentCollectionId ->
+                taskDelegate.updateCurrentCollectionId(currentCollectionId)
+            }
         }
     }
 
