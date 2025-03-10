@@ -25,7 +25,7 @@ import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
  */
  
 @Composable
-fun TaskListPage(state: TaskPageUiState, taskDelegate: TaskDelegate) {
+fun TaskListPage(collectionId: Long, state: TaskPageUiState, taskDelegate: TaskDelegate) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .fillMaxHeight()
@@ -34,7 +34,7 @@ fun TaskListPage(state: TaskPageUiState, taskDelegate: TaskDelegate) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ActiveTaskListSection(state.activeTaskList, taskDelegate)
+        ActiveTaskListSection(collectionId, state.activeTaskList, taskDelegate)
         CompletedTaskListSection(state.completedTaskList, taskDelegate)
     }
 }

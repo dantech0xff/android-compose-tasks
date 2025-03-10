@@ -62,6 +62,6 @@ fun PagerTabLayout(state: List<TaskGroupUiState>, taskDelegate: TaskDelegate) {
         pagerState, key = { it },
         beyondViewportPageCount = 2
     ) { pageIndex ->
-        TaskListPage(state = state[pageIndex].page, taskDelegate)
+        TaskListPage(collectionId = state[pageIndex].tab.id, state = state[pageIndex].page, taskDelegate)
     }
 }

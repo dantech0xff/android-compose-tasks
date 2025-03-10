@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.creative.androidtasks.repository.TaskRepo
+import com.creative.androidtasks.ui.AppMenuItem
 import com.creative.androidtasks.ui.pagertab.state.TabUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskGroupUiState
 import com.creative.androidtasks.ui.pagertab.state.TaskPageUiState
@@ -45,10 +46,10 @@ class MainViewModel @Inject constructor(
                 tab = TabUiState(ID_FAVORITE_LIST, "⭐"),
                 page = TaskPageUiState(
                     mutableListOf<TaskUiState>().apply {
-                    it.forEach { tab ->
-                        addAll(tab.page.activeTaskList.filter { task -> task.isFavorite })
-                    }
-                }.sortedByDescending { task -> task.updatedAt },
+                        it.forEach { tab ->
+                            addAll(tab.page.activeTaskList.filter { task -> task.isFavorite })
+                        }
+                    }.sortedByDescending { task -> task.updatedAt },
                     emptyList()
                 )
             )
@@ -59,6 +60,7 @@ class MainViewModel @Inject constructor(
     }
 
     private var _currentSelectedCollectionId: Long = -1L
+
     init {
         viewModelScope.launch {
             val listTasksCollections = taskRepo.getTaskCollections()
@@ -78,8 +80,9 @@ class MainViewModel @Inject constructor(
                     taskEntity.toTaskUiState()
                 }
                 val tabUiState = taskCollection.toTabUiState()
-                TaskGroupUiState(tabUiState, TaskPageUiState(
-                    activeTaskList = listTaskUiState.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
+                TaskGroupUiState(
+                    tabUiState, TaskPageUiState(
+                        activeTaskList = listTaskUiState.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
                     completedTaskList = listTaskUiState.filter { it.isCompleted }.sortedByDescending { it.updatedAt }
                 ))
             }
@@ -205,6 +208,35 @@ class MainViewModel @Inject constructor(
             _eventFlow.emit(MainEvent.RequestAddNewCollection)
         }
     }
+
+    override fun requestUpdateCollection(collectionId: Long) {
+        Log.d("MainViewModel", "Request update collection $collectionId")
+        // Delete Collection
+        // Rename Collection
+        val actionList = listOf(
+            AppMenuItem("Delete Collection") {
+                Log.d("MainViewModel", "Request Delete Collection $collectionId")
+                deleteCollectionById(collectionId)
+            },
+            AppMenuItem("Rename Collection") {
+                Log.d("MainViewModel", "Request Rename Collection $collectionId")
+            }
+        )
+        viewModelScope.launch {
+            _eventFlow.emit(MainEvent.RequestShowBottomSheetOptions(actionList))
+        }
+    }
+
+    private fun deleteCollectionById(collectionId: Long) {
+        viewModelScope.launch {
+            if (taskRepo.deleteTaskCollectionById(collectionId)) {
+                _listTabGroup.value.let { listTabs ->
+                    val newTabGroup = listTabs.filter { tabItem -> tabItem.tab.id != collectionId }
+                    _listTabGroup.value = newTabGroup
+                }
+            }
+        }
+    }
 }
 
 interface TaskDelegate {
@@ -216,8 +248,10 @@ interface TaskDelegate {
     fun currentCollectionId(): Long = -1L
     fun addNewCollection(title: String) = Unit
     fun requestAddNewCollection(): Unit = Unit
+    fun requestUpdateCollection(collectionId: Long) = Unit
 }
 
 sealed class MainEvent {
     data object RequestAddNewCollection : MainEvent()
+    data class RequestShowBottomSheetOptions(val list: List<AppMenuItem>) : MainEvent()
 }

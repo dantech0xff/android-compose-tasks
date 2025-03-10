@@ -36,7 +36,7 @@ import com.creative.androidtasks.ui.pagertab.state.TaskUiState
  */
  
 @Composable
-fun ActiveTaskListSection(activeTaskList: List<TaskUiState>, taskDelegate: TaskDelegate) {
+fun ActiveTaskListSection(collectionId: Long, activeTaskList: List<TaskUiState>, taskDelegate: TaskDelegate) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,14 +79,18 @@ fun ActiveTaskListSection(activeTaskList: List<TaskUiState>, taskDelegate: TaskD
                 Text(
                     "S",
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.clickable {  }.padding(vertical = 4.dp, horizontal = 8.dp)
+                    modifier = Modifier.clickable { }.padding(vertical = 4.dp, horizontal = 8.dp)
                 )
                 Spacer(modifier = Modifier.padding(4.dp))
-                Text(
-                    "D",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.clickable {  }.padding(vertical = 4.dp, horizontal = 8.dp)
-                )
+                if (collectionId > 0) {
+                    Text(
+                        "D",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.clickable {
+                            taskDelegate.requestUpdateCollection(collectionId)
+                        }.padding(vertical = 4.dp, horizontal = 8.dp)
+                    )
+                }
             }
         }
         activeTaskList.forEach {

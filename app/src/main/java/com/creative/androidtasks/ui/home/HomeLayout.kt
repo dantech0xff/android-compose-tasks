@@ -1,5 +1,7 @@
 package com.creative.androidtasks.ui.home
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,10 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.creative.androidtasks.MainEvent
 import com.creative.androidtasks.MainViewModel
+import com.creative.androidtasks.ui.AppMenuItem
 import com.creative.androidtasks.ui.floataction.AppFloatActionButton
 import com.creative.androidtasks.ui.pagertab.PagerTabLayout
 import com.creative.androidtasks.ui.topbar.TopBar
@@ -40,12 +44,17 @@ fun HomeLayout(mainViewModel: MainViewModel = hiltViewModel()) {
     val taskDelegate = remember { mainViewModel }
     var isShowAddNoteBottomSheet by remember { mutableStateOf(false) }
     var isShowAddTaskCollectionBottomSheet by remember { mutableStateOf(false) }
+    var menuListBottomSheet by remember { mutableStateOf<List<AppMenuItem>?>(null) }
 
     LaunchedEffect(Unit) {
         mainViewModel.eventFlow.collect {
             when (it) {
                 MainEvent.RequestAddNewCollection -> {
                     isShowAddTaskCollectionBottomSheet = true
+                }
+                is MainEvent.RequestShowBottomSheetOptions -> {
+                    Log.d("HomeLayout", "$it")
+                    menuListBottomSheet = it.list
                 }
             }
         }
@@ -111,6 +120,19 @@ fun HomeLayout(mainViewModel: MainViewModel = hiltViewModel()) {
                     isShowAddTaskCollectionBottomSheet = false
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text("Add Task Collection")
+                }
+            }
+        }
+
+        if(!menuListBottomSheet.isNullOrEmpty()) {
+            ModalBottomSheet({
+                menuListBottomSheet = null
+            }) {
+                menuListBottomSheet?.forEach {
+                    Text(it.title, modifier = Modifier.fillMaxWidth().clickable {
+                        it.action.invoke()
+                        menuListBottomSheet = null
+                    }.padding(12.dp))
                 }
             }
         }
