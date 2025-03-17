@@ -1,6 +1,7 @@
 package com.creative.androidtasks.repository
 
 import com.creative.androidtasks.database.dao.TaskDAO
+import com.creative.androidtasks.database.entity.SortType
 import com.creative.androidtasks.database.entity.TaskCollection
 import com.creative.androidtasks.database.entity.TaskEntity
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class TaskRepoImpl(
 
     override suspend fun addTaskCollection(title: String): TaskCollection? = withContext(Dispatchers.IO) {
         val now = Calendar.getInstance().timeInMillis
-        val taskCollection = TaskCollection(title = title, updatedAt = now, createdAt = now)
+        val taskCollection = TaskCollection(title = title, updatedAt = now, createdAt = now, sortType = SortType.CREATED_DATE.value)
         val id = taskDAO.insertTaskCollection(taskCollection)
         if (id > 0) {
             taskCollection.copy(id = id)
@@ -72,6 +73,12 @@ class TaskRepoImpl(
     override suspend fun deleteTaskCollectionById(collectionId: Long): Boolean {
         return withContext(Dispatchers.IO) {
             taskDAO.deleteTaskCollectionById(collectionId) > 0
+        }
+    }
+
+    override suspend fun updateCollectionSortType(collectionId: Long, sortType: SortType): Boolean {
+        return withContext(Dispatchers.IO) {
+            taskDAO.updateCollectionSortType(collectionId, sortType = sortType.value) > 0
         }
     }
 }

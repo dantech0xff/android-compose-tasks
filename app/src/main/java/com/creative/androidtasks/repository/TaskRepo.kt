@@ -1,5 +1,6 @@
 package com.creative.androidtasks.repository
 
+import com.creative.androidtasks.database.entity.SortType
 import com.creative.androidtasks.database.entity.TaskCollection
 import com.creative.androidtasks.database.entity.TaskEntity
 
@@ -19,4 +20,5 @@ interface TaskRepo {
     suspend fun updateTaskFavorite(taskId: Long, isFavorite: Boolean): Boolean
     suspend fun updateTaskCollection(taskCollection: TaskCollection): Boolean
     suspend fun deleteTaskCollectionById(collectionId: Long): Boolean
+    suspend fun updateCollectionSortType(collectionId: Long, sortType: SortType): Boolean
 }

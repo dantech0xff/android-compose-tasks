@@ -13,5 +13,19 @@ data class TaskCollection(
     @ColumnInfo(name = "updated_at")
     val updatedAt: Long,
     @ColumnInfo(name = "created_at")
-    val createdAt: Long
+    val createdAt: Long,
+    @ColumnInfo(name = "sort_type", defaultValue = "0")
+    val sortType: Int
 )
+
+enum class SortType(val value: Int) {
+    CREATED_DATE(0),
+    FAVORITE(1),
+}
+
+fun Int.toSortType(): SortType {
+    return when (this) {
+        1 -> SortType.FAVORITE
+        else -> SortType.CREATED_DATE
+    }
+}

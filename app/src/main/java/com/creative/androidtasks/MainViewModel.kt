@@ -3,6 +3,7 @@ package com.creative.androidtasks
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.creative.androidtasks.database.entity.SortType
 import com.creative.androidtasks.repository.TaskRepo
 import com.creative.androidtasks.ui.AppMenuItem
 import com.creative.androidtasks.ui.pagertab.state.TabUiState
@@ -43,7 +44,7 @@ class MainViewModel @Inject constructor(
     val listTabGroup = _listTabGroup.map {
         listOf(
             TaskGroupUiState(
-                tab = TabUiState(ID_FAVORITE_LIST, "⭐"),
+                tab = TabUiState(ID_FAVORITE_LIST, "⭐", SortType.CREATED_DATE),
                 page = TaskPageUiState(
                     mutableListOf<TaskUiState>().apply {
                         it.forEach { tab ->
@@ -53,8 +54,26 @@ class MainViewModel @Inject constructor(
                     emptyList()
                 )
             )
-        ) + it + TaskGroupUiState(
-            tab = TabUiState(ID_ADD_NEW_LIST, "Add New List"),
+        ) + it.map { tabItem ->
+            val sortType = tabItem.tab.sortType
+            val activeTaskList = tabItem.page.activeTaskList
+            tabItem.copy(
+                tab = tabItem.tab,
+                page = tabItem.page.copy(
+                    activeTaskList = if (sortType == SortType.FAVORITE) {
+                        activeTaskList.sortedByDescending { task ->
+                            task.isFavorite
+                        }
+                    } else {
+                        activeTaskList.sortedByDescending { task ->
+                            task.createdAt
+                        }
+                    },
+                    completedTaskList = tabItem.page.completedTaskList.sortedByDescending { task -> task.updatedAt }
+                )
+            )
+        } + TaskGroupUiState(
+            tab = TabUiState(ID_ADD_NEW_LIST, "Add New List", SortType.CREATED_DATE),
             page = TaskPageUiState(emptyList(), emptyList())
         )
     }
@@ -82,9 +101,9 @@ class MainViewModel @Inject constructor(
                 val tabUiState = taskCollection.toTabUiState()
                 TaskGroupUiState(
                     tabUiState, TaskPageUiState(
-                        activeTaskList = listTaskUiState.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
-                    completedTaskList = listTaskUiState.filter { it.isCompleted }.sortedByDescending { it.updatedAt }
-                ))
+                        activeTaskList = listTaskUiState.filter { !it.isCompleted },
+                        completedTaskList = listTaskUiState.filter { it.isCompleted }
+                    ))
             }
             _listTabGroup.value = listTabGroupUiState
         }
@@ -104,13 +123,13 @@ class MainViewModel @Inject constructor(
                                 updatedAt = Calendar.getInstance().timeInMillis,
                                 stringUpdatedAt = Calendar.getInstance().time.toString()
                             ) else task
-                        }.sortedByDescending { it.updatedAt },
+                        },
                         completedTaskList = tabGroup.page.completedTaskList.map { task ->
                             if (task.id == newTaskUiState.id) newTaskUiState.copy(
                                 updatedAt = Calendar.getInstance().timeInMillis,
                                 stringUpdatedAt = Calendar.getInstance().time.toString()
                             ) else task
-                        }.sortedByDescending { it.updatedAt }
+                        }
                     )
                     tabGroup.copy(page = newPage)
                 }
@@ -141,8 +160,8 @@ class MainViewModel @Inject constructor(
                         }
                     }
                     val newPage = tabGroup.page.copy(
-                        activeTaskList = updatedList.filter { !it.isCompleted }.sortedByDescending { it.updatedAt },
-                        completedTaskList = updatedList.filter { it.isCompleted }.sortedByDescending { it.updatedAt }
+                        activeTaskList = updatedList.filter { !it.isCompleted },
+                        completedTaskList = updatedList.filter { it.isCompleted }
                     )
                     tabGroup.copy(page = newPage)
                 }
@@ -159,9 +178,7 @@ class MainViewModel @Inject constructor(
                     val newTabGroup = listTabGroup.map { tabGroup ->
                         if (tabGroup.tab.id == collectionId) {
                             val newPage = tabGroup.page.copy(
-                                activeTaskList = (tabGroup.page.activeTaskList + newTaskUiState).sortedByDescending {
-                                    it.updatedAt
-                                }
+                                activeTaskList = (tabGroup.page.activeTaskList + newTaskUiState)
                             )
                             tabGroup.copy(page = newPage)
                         } else {
@@ -237,6 +254,38 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    private fun sortCollectionBy(collectionId: Long, sortType: SortType) {
+        viewModelScope.launch {
+            if (taskRepo.updateCollectionSortType(collectionId, sortType)) {
+                _listTabGroup.value.let { listTabs ->
+                    val newTabGroup = listTabs.map { tabGroup ->
+                        if (tabGroup.tab.id == collectionId) {
+                            tabGroup.copy(tab = tabGroup.tab.copy(sortType = sortType))
+                        } else {
+                            tabGroup
+                        }
+                    }
+                    _listTabGroup.value = newTabGroup
+                }
+            }
+        }
+    }
+
+    override fun requestSortTasks(collectionId: Long) {
+        viewModelScope.launch {
+            _eventFlow.emit(
+                MainEvent.RequestShowBottomSheetOptions(
+                    listOf(
+                        AppMenuItem("Sort By Favorite") {
+                            sortCollectionBy(collectionId, SortType.FAVORITE)
+                        },
+                        AppMenuItem("Sort By Created Date") {
+                            sortCollectionBy(collectionId, SortType.CREATED_DATE)
+                        }
+                    )))
+        }
+    }
 }
 
 interface TaskDelegate {
@@ -249,6 +298,7 @@ interface TaskDelegate {
     fun addNewCollection(title: String) = Unit
     fun requestAddNewCollection(): Unit = Unit
     fun requestUpdateCollection(collectionId: Long) = Unit
+    fun requestSortTasks(collectionId: Long) = Unit
 }
 
 sealed class MainEvent {

@@ -72,7 +72,8 @@ fun TaskItemLayoutPreview() {
             collectionId = 1,
             id = 1,
             updatedAt = 0L,
-            stringUpdatedAt = "2025-02-22"
+            stringUpdatedAt = "2025-02-22",
+            createdAt = 0L
         ),
         taskDelegate = object : TaskDelegate {}
     )

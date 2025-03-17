@@ -1,9 +1,14 @@
 package com.creative.androidtasks.database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.RenameTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.creative.androidtasks.database.dao.TaskDAO
 import com.creative.androidtasks.database.entity.TaskCollection
 import com.creative.androidtasks.database.entity.TaskEntity
@@ -15,7 +20,7 @@ import com.creative.androidtasks.database.entity.TaskEntity
  */
 
 private const val DATABASE_NAME = "app.db"
-private const val DATABASE_VERSION = 1
+private const val DATABASE_VERSION = 2
 
 @Database(
     entities = [TaskCollection::class, TaskEntity::class],
@@ -37,6 +42,12 @@ abstract class AppDb : RoomDatabase() {
             context,
             AppDb::class.java,
             DATABASE_NAME
-        ).build()
+        ).addMigrations(MIGRATE_1_2).build()
+    }
+}
+
+private val MIGRATE_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE task_collection ADD COLUMN sort_type INTEGER NOT NULL DEFAULT 0")
     }
 }
