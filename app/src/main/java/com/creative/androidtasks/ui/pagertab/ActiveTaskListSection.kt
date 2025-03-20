@@ -41,68 +41,69 @@ fun ActiveTaskListSection(
     activeTaskList: List<TaskUiState>,
     taskDelegate: TaskDelegate
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(
-                color = Color.Black.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(vertical = 12.dp)
-            .animateContentSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AnimatedVisibility(
-            visible = activeTaskList.isEmpty()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val lottieComposition by rememberLottieComposition(
-                    spec = LottieCompositionSpec.RawRes(R.raw.lottie_empty_01)
-                )
-                LottieAnimation(lottieComposition)
-                Text("All Tasks Completed", style = MaterialTheme.typography.headlineMedium)
-                Text("Nice work!", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-        AnimatedVisibility(visible = activeTaskList.isNotEmpty()) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Text(
-                    "Title",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1.0f),
-                    textAlign = TextAlign.Start
-                )
-                Text(
-                    "S",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.clickable {
-                        taskDelegate.requestSortTasks(collectionId)
-                    }.padding(vertical = 4.dp, horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.padding(4.dp))
-                if (collectionId > 0) {
-                    Text(
-                        "D",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.clickable {
-                            taskDelegate.requestUpdateCollection(collectionId)
-                        }.padding(vertical = 4.dp, horizontal = 8.dp)
-                    )
-                }
-            }
-        }
-        activeTaskList.forEach {
-            key(it.id) {
-                TaskItemLayout(it, taskDelegate)
-            }
-        }
-    }
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .wrapContentHeight()
+//            .background(
+//                color = Color.Black.copy(alpha = 0.1f),
+//                shape = RoundedCornerShape(12.dp)
+//            )
+//            .padding(vertical = 12.dp)
+//            .animateContentSize(),
+//        verticalArrangement = Arrangement.Top,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        AnimatedVisibility(
+//            visible = activeTaskList.isEmpty()
+//        ) {
+//            Column(
+//                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+//                verticalArrangement = Arrangement.spacedBy(2.dp),
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//                val lottieComposition by rememberLottieComposition(
+//                    spec = LottieCompositionSpec.RawRes(R.raw.lottie_empty_01)
+//                )
+//                LottieAnimation(lottieComposition)
+//                Text("All Tasks Completed", style = MaterialTheme.typography.headlineMedium)
+//                Text("Nice work!", style = MaterialTheme.typography.bodyMedium)
+//            }
+//        }
+//
+//        AnimatedVisibility(visible = activeTaskList.isNotEmpty()) {
+//            Row(
+//                modifier = Modifier.padding(horizontal = 8.dp)
+//            ) {
+//                Text(
+//                    "Title",
+//                    style = MaterialTheme.typography.titleLarge,
+//                    modifier = Modifier.weight(1.0f),
+//                    textAlign = TextAlign.Start
+//                )
+//                Text(
+//                    "S",
+//                    style = MaterialTheme.typography.titleSmall,
+//                    modifier = Modifier.clickable {
+//                        taskDelegate.requestSortTasks(collectionId)
+//                    }.padding(vertical = 4.dp, horizontal = 8.dp)
+//                )
+//                Spacer(modifier = Modifier.padding(4.dp))
+//                if (collectionId > 0) {
+//                    Text(
+//                        "D",
+//                        style = MaterialTheme.typography.titleSmall,
+//                        modifier = Modifier.clickable {
+//                            taskDelegate.requestUpdateCollection(collectionId)
+//                        }.padding(vertical = 4.dp, horizontal = 8.dp)
+//                    )
+//                }
+//            }
+//        }
+//        activeTaskList.forEach {
+//            key(it.id) {
+//                TaskItemLayout(it, taskDelegate)
+//            }
+//        }
+//    }
 }
